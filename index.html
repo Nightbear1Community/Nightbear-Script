@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nightbear Script</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #00ff41; /* Matrix green */
+            --secondary-color: #008f11;
+            --dark-color: #0d0208;
+            --light-color: #f8f9fa;
+            --accent-color: #00ff41;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace; /* Terminal-style font */
+        }
+
+        body {
+            background-color: var(--dark-color);
+            color: var(--light-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Matrix background */
+        #matrix-bg {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            opacity: 0.15;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Top Bar with Social Links */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-link {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            opacity: 0.7;
+        }
+
+        .social-link:hover {
+            opacity: 1;
+            transform: translateY(-2px);
+            text-shadow: 0 0 5px var(--primary-color);
+        }
+
+        .contact-email {
+            background: rgba(0, 255, 65, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(5px);
+            color: var(--primary-color);
+            border: 1px solid rgba(0, 255, 65, 0.3);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            animation: fadeInDown 1s ease;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+            text-shadow: 0 0 10px var(--primary-color);
+            display: inline-block;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            color: var(--primary-color);
+        }
+
+        /* Navigation */
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+
+        .tab-btn {
+            padding: 0.8rem 1.5rem;
+            background: rgba(0, 255, 65, 0.1);
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            border-radius: 50px;
+            color: var(--primary-color);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .tab-btn:hover {
+            background: rgba(0, 255, 65, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+        }
+
+        .tab-btn.active {
+            background: rgba(0, 255, 65, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.4);
+        }
+
+        /* Tab content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Home page - Games grid */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .game-card {
+            background: rgba(0, 255, 65, 0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid rgba(0, 255, 65, 0.1);
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.2);
+            border-color: rgba(0, 255, 65, 0.3);
+        }
+
+        .game-card img {
+            width: 100%;
+            height: 70%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .game-card:hover img {
+            transform: scale(1.05);
+        }
+
+        .game-info {
+            padding: 1rem;
+        }
+
+        .game-info h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+
+        .game-info p {
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        /* Scripts page - Individual script boxes */
+        .scripts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .script-box {
+            background: rgba(0, 255, 65, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 255, 65, 0.1);
+        }
+
+        .script-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.2);
+            border-color: rgba(0, 255, 65, 0.3);
+        }
+
+        .script-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .script-title {
+            font-size: 1.3rem;
+            color: var(--primary-color);
+        }
+
+        .script-description {
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            line-height: 1.5;
+        }
+
+        .copy-btn {
+            background: rgba(0, 255, 65, 0.2);
+            border: 1px solid rgba(0, 255, 65, 0.4);
+            border-radius: 5px;
+            color: var(--primary-color);
+            padding: 0.4rem 0.8rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            transform: scale(1.05);
+            background: rgba(0, 255, 65, 0.3);
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
+        }
+
+        .script-content {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 0.8rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-x: auto;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 0.5rem;
+            border: 1px solid rgba(0, 255, 65, 0.1);
+            color: var(--primary-color);
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-top: 1.5rem;
+            padding: 0.8rem 1.5rem;
+            background: rgba(0, 255, 65, 0.1);
+            border-radius: 50px;
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            text-align: center;
+            width: 100%;
+            border: 1px solid rgba(0, 255, 65, 0.2);
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 255, 65, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.1);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 1rem;
+            opacity: 0.7;
+            font-size: 0.9rem;
+            color: var(--primary-color);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: var(--primary-color);
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            z-index: 100;
+            display: none;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .games-grid, .scripts-container {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .nav-tabs {
+                flex-wrap: wrap;
+            }
+
+            .game-card {
+                height: auto;
+            }
+
+            .top-bar {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .games-grid, .scripts-container {
+                grid-template-columns: 1fr;
+            }
+
+            .script-box {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Matrix Background Canvas -->
+    <canvas id="matrix-bg"></canvas>
+
+    <div class="container">
+        <!-- Top Bar with Social Links -->
+        <div class="top-bar">
+            <div class="social-links">
+                <a href="https://discord.gg/nightbear" class="social-link" target="_blank">
+                    <i class="fab fa-discord"></i>
+                </a>
+                <a href="https://github.com/nightbear" class="social-link" target="_blank">
+                    <i class="fab fa-github"></i>
+                </a>
+                <a href="https://twitter.com/nightbear" class="social-link" target="_blank">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a href="https://youtube.com/nightbear" class="social-link" target="_blank">
+                    <i class="fab fa-youtube"></i>
+                </a>
+            </div>
+            <div class="contact-email">
+                <i class="fas fa-envelope"></i> contact@nightbear.dev
+            </div>
+        </div>
+
+        <header>
+            <h1 class="floating">Nightbear Script</h1>
+            <p class="subtitle">Premium scripts for your favorite games</p>
+        </header>
+
+        <div class="nav-tabs">
+            <button class="tab-btn active" data-tab="home">Home</button>
+            <button class="tab-btn" data-tab="scripts">All Scripts</button>
+        </div>
+
+        <!-- Home Tab Content -->
+        <div id="home" class="tab-content active">
+            <h2>Supported Games</h2>
+            <div class="games-grid">
+                <!-- Game cards will be added dynamically by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Script Tab Content -->
+        <div id="scripts" class="tab-content">
+            <div class="scripts-container">
+                <!-- Script boxes will be added dynamically -->
+            </div>
+            <a href="#" class="back-btn" id="back-btn">
+                <i class="fas fa-arrow-left"></i> Back to Games
+            </a>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Made by Nightbear | Team</p>
+    </footer>
+
+    <div class="toast" id="toast">Script copied!</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Matrix background animation
+            const canvas = document.getElementById('matrix-bg');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+            const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const nums = '0123456789';
+            const alphabet = katakana + latin + nums;
+            
+            const fontSize = 16;
+            const columns = canvas.width / fontSize;
+            
+            const rainDrops = [];
+            
+            for (let x = 0; x < columns; x++) {
+                rainDrops[x] = 1;
+            }
+            
+            const draw = () => {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#00ff41';
+                ctx.font = fontSize + 'px monospace';
+                
+                for (let i = 0; i < rainDrops.length; i++) {
+                    const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                    ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+                    
+                    if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        rainDrops[i] = 0;
+                    }
+                    rainDrops[i]++;
+                }
+            };
+            
+            setInterval(draw, 30);
+            
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+
+            // Tab switching functionality
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.getAttribute('data-tab');
+                    
+                    // Update active tab button
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    // Show corresponding tab content
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === tabId) {
+                            content.classList.add('active');
+                        }
+                    });
+                });
+            });
+
+            // Game data with associated scripts
+            const gameData = [
+                {
+                    id: "adopt-me",
+                    title: "Adopt Me!",
+                    description: "Pet collection and roleplay game",
+                    image: "https://tr.rbxcdn.com/180DAY-cac7ee5cfe82bc8d7a8fcf4711fdb526/512/512/Image/Webp/noFilter",
+                    script: `-- Adopt Me! Auto-Farm Script
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local function teleportToNearestPet()
+    -- Find nearest pet logic here
+    print("Teleporting to nearest pet...")
+end
+
+local function autoCollectMoney()
+    -- Money collection logic here
+    print("Auto-collecting money...")
+end
+
+-- Main execution
+teleportToNearestPet()
+autoCollectMoney()`,
+                    scriptDescription: "This script automatically collects money and teleports to the nearest pet in Adopt Me! for efficient farming."
+                },
+                {
+                    id: "brookhaven",
+                    title: "Brookhaven RP",
+                    description: "Popular roleplaying game",
+                    image: "https://tr.rbxcdn.com/180DAY-80df832c192f6497e75713c107b12d8f/512/512/Image/Webp/noFilter",
+                    script: `-- Brookhaven RP Script
+-- Features: Auto-money, Godmode, Speed
+
+local Player = game:GetService("Players").LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+
+-- Godmode function
+local function enableGodmode()
+    print("Godmode activated!")
+end
+
+-- Speed boost
+local function setSpeed(value)
+    local humanoid = Character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = value
+    end
+end
+
+-- Execute features
+enableGodmode()
+setSpeed(32)`,
+                    scriptDescription: "Enhance your Brookhaven experience with godmode, speed boosts, and automatic money collection."
+                },
+                {
+                    id: "mm2",
+                    title: "Murder Mystery 2",
+                    description: "Classic whodunit game",
+                    image: "https://tr.rbxcdn.com/180DAY-cee6edfb36f7c1d81e9ab0729d084de5/512/512/Image/Webp/noFilter",
+                    script: `-- Murder Mystery 2 Script
+-- Features: See murderer, Auto-win
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local function highlightMurderer()
+    print("Murderer highlighted!")
+end
+
+local function autoKillWhenMurderer()
+    print("Auto-kill enabled when murderer")
+end
+
+-- Main features
+highlightMurderer()
+autoKillWhenMurderer()`,
+                    scriptDescription: "Gain an advantage by seeing who the murderer is and automatically winning when you're the killer."
+                }
+            ];
+
+            // Generate game cards on home page
+            const gamesGrid = document.querySelector('.games-grid');
+            gameData.forEach(game => {
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                card.dataset.gameId = game.id;
+                card.innerHTML = `
+                    <img src="${game.image}" alt="${game.title}">
+                    <div class="game-info">
+                        <h3>${game.title}</h3>
+                        <p>${game.description}</p>
+                    </div>
+                `;
+                gamesGrid.appendChild(card);
+            });
+
+            // Generate script boxes on scripts page
+            const scriptsContainer = document.querySelector('.scripts-container');
+            gameData.forEach(game => {
+                const scriptBox = document.createElement('div');
+                scriptBox.className = 'script-box';
+                scriptBox.innerHTML = `
+                    <div class="script-header">
+                        <h3 class="script-title">${game.title} Script</h3>
+                        <button class="copy-btn" data-script="${game.id}">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <p class="script-description">${game.scriptDescription}</p>
+                    <div class="script-content" id="script-${game.id}">
+                        ${game.script}
+                    </div>
+                `;
+                scriptsContainer.appendChild(scriptBox);
+            });
+
+            // Copy script functionality
+            document.querySelectorAll('.copy-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const scriptId = button.getAttribute('data-script');
+                    const scriptContent = document.getElementById(`script-${scriptId}`);
+                    
+                    const range = document.createRange();
+                    range.selectNode(scriptContent);
+                    window.getSelection().removeAllRanges();
+                    window.getSelection().addRange(range);
+                    document.execCommand('copy');
+                    window.getSelection().removeAllRanges();
+                    
+                    // Show toast notification
+                    const toast = document.getElementById('toast');
+                    toast.style.display = 'block';
+                    setTimeout(() => {
+                        toast.style.display = 'none';
+                    }, 2000);
+                });
+            });
+
+            // Back button functionality
+            const backButton = document.getElementById('back-btn');
+            backButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelector('.tab-btn[data-tab="home"]').click();
+            });
+
+            // Add tilt effect to game cards
+            const gameCards = document.querySelectorAll('.game-card');
+            gameCards.forEach(card => {
+                // For desktop
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const angleX = (y - centerY) / 20;
+                    const angleY = (centerX - x) / 20;
+                    
+                    card.style.transform = `perspective(1000px) rotateX(${angleX}deg) rotateY(${angleY}deg) translateY(-10px) scale(1.02)`;
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateY(0) scale(1)';
+                });
+
+                // For mobile touch
+                card.addEventListener('touchmove', (e) => {
+                    const touch = e.touches[0];
+                    const rect = card.getBoundingClientRect();
+                    const x = touch.clientX - rect.left;
+                    const y = touch.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const angleX = (y - centerY) / 20;
+                    const angleY = (centerX - x) / 20;
+                    
+                    card.style.transform = `perspective(1000px) rotateX(${angleX}deg) rotateY(${angleY}deg) translateY(-10px) scale(1.02)`;
+                });
+
+                card.addEventListener('touchend', () => {
+                    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateY(0) scale(1)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
